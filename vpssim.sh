@@ -113,68 +113,36 @@ clear
 bash /etc/vpssim/.tmp/vpssim-setup
 exit
 fi
-
 generate_password() {
     local password=$(openssl rand -base64 12)
     echo "$password"
-}
-
-# Function to check if password meets requirements
-check_password() {
-    local password="$1"
-    local checkpass="^[a-zA-Z0-9_][-a-zA-Z0-9_]{0,61}[a-zA-Z0-9_]+$"
-
-    if [[ ${#password} -lt 8 ]]; then
-        return 1
-    fi
-
-    if [[ ! "$password" =~ $checkpass ]]; then
-        return 2
-    fi
-
-    return 0
 }
 
 echo "-------------------------------------------------------------------------"
 echo "Mật khẩu bảo vệ cho phpMyAdmin phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
 echo "-------------------------------------------------------------------------"
 
-# Generate or prompt for phpMyAdmin password
-while true; do
-    read -p "Nhập mật khẩu bảo vệ cho phpMyAdmin [ENTER] hoặc nhấn Enter để sử dụng mật khẩu ngẫu nhiên: " matkhaubv
-    if [[ -z "$matkhaubv" ]]; then
-        matkhaubv=$(generate_password)
-    fi
-    check_password "$matkhaubv"
-    if [[ $? -ne 0 ]]; then
-        echo "Mật khẩu không đáp ứng yêu cầu. Vui lòng thử lại!"
-    else
-        break
-    fi
-done
+# Generate phpMyAdmin password
+matkhaubv=$(generate_password)
 
 echo "-------------------------------------------------------------------------"
 echo "Mật khẩu root của MySQL phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
 echo "-------------------------------------------------------------------------"
 
-# Generate or prompt for MySQL root password
-while true; do
-    read -p "Nhập mật khẩu root của MySQL [ENTER] hoặc nhấn Enter để sử dụng mật khẩu ngẫu nhiên: " passrootmysql
-    if [[ -z "$passrootmysql" ]]; then
-        passrootmysql=$(generate_password)
-    fi
-    check_password "$passrootmysql"
-    if [[ $? -ne 0 ]]; then
-        echo "Mật khẩu không đáp ứng yêu cầu. Vui lòng thử lại!"
-    else
-        break
-    fi
-done
+# Generate MySQL root password
+passrootmysql=$(generate_password)
 
 echo "-------------------------------------------------------------------------"
 echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
 echo "Mật khẩu root của MySQL: $passrootmysql"
-echo "-------------------------------------------------------------------------"p
+echo "-------------------------------------------------------------------------"
+echo "Ban vui long thu lai !"
+echo "-------------------------------------------------------------------------"
+read -p "Nhan [Enter] de tiep tuc ..."
+clear
+bash /etc/vpssim/.tmp/vpssim-setup
+exit
+fi  
 
 prompt="Nhap lua chon cua ban: "
 options=( "MariaDB 10.3 " "MariaDB 10.2 " "MariaDB 10.1" "MariaDB 10.0")
@@ -771,7 +739,7 @@ echo ""
 echo "Nhung viec nen lam sau khi them website vao VPS: http://go.vpssim.vn/1138"
 echo ""
 echo "--------------------------------------------------------------------------"
-echo "Server se khoi dong lai sau 15 giay.... "
-sleep 15
+echo "Server se khoi dong lai sau 3 giay.... "
+sleep 16
 reboot
 exit
