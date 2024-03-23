@@ -112,6 +112,8 @@ read -p "Nhan [Enter] de tiep tuc ..."
 clear
 bash /etc/vpssim/.tmp/vpssim-setup
 exit
+fi
+echo Mật khẩu bảo vệ cho phpMyAdmin
 generate_password() {
     local password=$(openssl rand -base64 12)
     echo "$password"
@@ -138,74 +140,43 @@ echo "Mật khẩu bảo vệ cho phpMyAdmin phải có ít nhất 8 ký tự v�
 echo "-------------------------------------------------------------------------"
 
 while true; do
-    read -p "Nhập mật khẩu bảo vệ cho phpMyAdmin [ENTER]: " matkhaubv
+    read -p "Nhập mật khẩu bảo vệ cho phpMyAdmin [ENTER] hoặc nhấn Enter để sử dụng mật khẩu ngẫu nhiên: " matkhaubv
+    if [[ -z "$matkhaubv" ]]; then
+        matkhaubv=$(generate_password)
+    fi
     check_password "$matkhaubv"
-    case $? in
-        1)
-            clear
-            echo "========================================================================="
-            echo "Mật khẩu bảo vệ cho phpMyAdmin phải có ít nhất 8 ký tự."
-            echo "-------------------------------------------------------------------------"
-            echo "Vui lòng thử lại!"
-            echo "-------------------------------------------------------------------------"
-            read -p "Nhấn [Enter] để tiếp tục ..."
-            clear
-            ;;
-        2)
-            clear
-            echo "========================================================================="
-            echo "Bạn chỉ được sử dụng chữ cái và số để đặt mật khẩu!"
-            echo "-------------------------------------------------------------------------"
-            echo "Vui lòng thử lại!"
-            echo "-------------------------------------------------------------------------"
-            read -p "Nhấn [Enter] để tiếp tục ..."
-            clear
-            ;;
-        *)
-            break
-            ;;
-    esac
+    if [[ $? -ne 0 ]]; then
+        echo "Mật khẩu không đáp ứng yêu cầu. Vui lòng thử lại!"
+    else
+        break
+    fi
 done
-
-echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
 
 echo "-------------------------------------------------------------------------"
 echo "Mật khẩu root của MySQL phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
 echo "-------------------------------------------------------------------------"
 
 while true; do
-    read -p "Nhập mật khẩu root của MySQL [ENTER]: " passrootmysql
+    read -p "Nhập mật khẩu root của MySQL [ENTER] hoặc nhấn Enter để sử dụng mật khẩu ngẫu nhiên: " passrootmysql
+    if [[ -z "$passrootmysql" ]]; then
+        passrootmysql=$(generate_password)
+    fi
     check_password "$passrootmysql"
-    case $? in
-        1)
-            clear
-            echo "========================================================================="
-            echo "Mật khẩu của tài khoản root MySQL phải có ít nhất 8 ký tự."
-            echo "-------------------------------------------------------------------------"
-            echo "Vui lòng thử lại!"
-            echo "-------------------------------------------------------------------------"
-            read -p "Nhấn [Enter] để tiếp tục ..."
-            clear
-            ;;
-        2)
-            clear
-            echo "========================================================================="
-            echo "Bạn chỉ được sử dụng chữ cái và số để đặt mật khẩu MySQL!"
-            echo "-------------------------------------------------------------------------"
-            echo "Vui lòng thử lại!"
-            echo "-------------------------------------------------------------------------"
-            read -p "Nhấn [Enter] để tiếp tục ..."
-            clear
-            ;;
-        *)
-            break
-            ;;
-    esac
+    if [[ $? -ne 0 ]]; then
+        echo "Mật khẩu không đáp ứng yêu cầu. Vui lòng thử lại!"
+    else
+        break
+    fi
 done
 
+echo "-------------------------------------------------------------------------"
+echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
 echo "Mật khẩu root của MySQL: $passrootmysql"
+echo "-------------------------------------------------------------------------"
+bash /etc/vpssim/.tmp/vpssim-setup
+exit
+fi  
 
-fi
 prompt="Nhap lua chon cua ban: "
 options=( "MariaDB 10.3 " "MariaDB 10.2 " "MariaDB 10.1" "MariaDB 10.0")
 echo "=========================================================================="
@@ -801,7 +772,7 @@ echo ""
 echo "Nhung viec nen lam sau khi them website vao VPS: http://go.vpssim.vn/1138"
 echo ""
 echo "--------------------------------------------------------------------------"
-echo "Server se khoi dong lai sau 3 giay.... "
-sleep 3
+echo "Server se khoi dong lai sau 15 giay.... "
+sleep 15
 reboot
 exit
