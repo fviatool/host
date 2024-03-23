@@ -113,7 +113,7 @@ clear
 bash /etc/vpssim/.tmp/vpssim-setup
 exit
 fi
-echo Mật khẩu bảo vệ cho phpMyAdmin
+
 generate_password() {
     local password=$(openssl rand -base64 12)
     echo "$password"
@@ -139,6 +139,7 @@ echo "-------------------------------------------------------------------------"
 echo "Mật khẩu bảo vệ cho phpMyAdmin phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
 echo "-------------------------------------------------------------------------"
 
+# Generate or prompt for phpMyAdmin password
 while true; do
     read -p "Nhập mật khẩu bảo vệ cho phpMyAdmin [ENTER] hoặc nhấn Enter để sử dụng mật khẩu ngẫu nhiên: " matkhaubv
     if [[ -z "$matkhaubv" ]]; then
@@ -156,6 +157,7 @@ echo "-------------------------------------------------------------------------"
 echo "Mật khẩu root của MySQL phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
 echo "-------------------------------------------------------------------------"
 
+# Generate or prompt for MySQL root password
 while true; do
     read -p "Nhập mật khẩu root của MySQL [ENTER] hoặc nhấn Enter để sử dụng mật khẩu ngẫu nhiên: " passrootmysql
     if [[ -z "$passrootmysql" ]]; then
@@ -172,8 +174,7 @@ done
 echo "-------------------------------------------------------------------------"
 echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
 echo "Mật khẩu root của MySQL: $passrootmysql"
-echo "-------------------------------------------------------------------------"
-done
+echo "-------------------------------------------------------------------------"p
 
 prompt="Nhap lua chon cua ban: "
 options=( "MariaDB 10.3 " "MariaDB 10.2 " "MariaDB 10.1" "MariaDB 10.0")
