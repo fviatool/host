@@ -173,7 +173,7 @@ echo "-------------------------------------------------------------------------"
 echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
 echo "Mật khẩu root của MySQL: $passrootmysql"
 echo "-------------------------------------------------------------------------"
-fi  
+done
 
 prompt="Nhap lua chon cua ban: "
 options=( "MariaDB 10.3 " "MariaDB 10.2 " "MariaDB 10.1" "MariaDB 10.0")
