@@ -13,7 +13,6 @@ kiemtraemail3="^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~])+\.)*[-a-zA-Z0-9\!#\$%\&\
 svip=$(wget http://ipecho.net/plain -O - -q ; echo)
 ###################################################################################################
 ###################################################################################################
-
 if [ -f /home/vpssim.conf ]; then
 clear
 echo "========================================================================="
@@ -54,94 +53,83 @@ echo "Memory: $svram MB"
 echo "Disk: $svhdd"
 echo "IP: $svip"
 echo "=========================================================================="
-echo "Dien Thong Tin Cai Dat: "
-echo "--------------------------------------------------------------------------"
-echo -n "Nhap PhpMyAdmin Port [ENTER]: " 
-read svport
-if [ "$svport" = "443" ] || [ "$svport" = "3306" ] || [ "$svport" = "465" ] || [ "$svport" = "587" ]; then
-	svport="2313"
-echo "Phpmyadmin khong the trung voi port cua dich vu khac !"
-echo "--------------------------------------------------------------------------"
-echo "VPSSIM se dat phpmyadmin port la 2313"
-fi
-if [ "$svport" = "" ] ; then
-clear
-echo "=========================================================================="
-echo "$svport khong duoc de trong."
-echo "--------------------------------------------------------------------------"
-echo "Ban hay kiem tra lai !" 
-bash /etc/vpssim/.tmp/vpssim-setup
-exit
-fi
-if ! [[ $svport -ge 100 && $svport -le 65535  ]] ; then  
-clear
-echo "=========================================================================="
-echo "$svport khong hop le!"
-echo "--------------------------------------------------------------------------"
-echo "Port hop le la so tu nhien nam trong khoang (100 - 65535)."
-echo "--------------------------------------------------------------------------"
-echo "Ban hay kiem tra lai !" 
-echo "-------------------------------------------------------------------------"
-read -p "Nhan [Enter] de tiep tuc ..."
-clear
-bash /etc/vpssim/.tmp/vpssim-setup
-exit
-fi 
-echo "--------------------------------------------------------------------------"
-echo -n "Nhap dia chi email quan ly [ENTER]: " 
-read vpssimemail
-if [ "$vpssimemail" = "" ]; then
-clear
-echo "=========================================================================="
-echo "Ban nhap sai, vui long nhap lai!"
-echo "-------------------------------------------------------------------------"
-read -p "Nhan [Enter] de tiep tuc ..."
-clear
-bash /etc/vpssim/.tmp/vpssim-setup
-exit
-fi
 
-if [[ ! "$vpssimemail" =~ $kiemtraemail3 ]]; then
-clear
-echo "=========================================================================="
-echo "$vpssimemail co le khong dung dinh dang email!"
-echo "--------------------------------------------------------------------------"
-echo "Ban vui long thu lai  !"
-echo "-------------------------------------------------------------------------"
-read -p "Nhan [Enter] de tiep tuc ..."
-clear
-bash /etc/vpssim/.tmp/vpssim-setup
-exit
-fi
+# Function to generate random password
 generate_password() {
     local password=$(openssl rand -base64 12)
     echo "$password"
 }
 
-echo "-------------------------------------------------------------------------"
-echo "Mật khẩu bảo vệ cho phpMyAdmin phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
-echo "-------------------------------------------------------------------------"
+echo "Dien Thong Tin Cai Dat: "
+echo "--------------------------------------------------------------------------"
+echo -n "Nhap PhpMyAdmin Port [ENTER]: " 
+read svport
+if [ "$svport" = "443" ] || [ "$svport" = "3306" ] || [ "$svport" = "465" ] || [ "$svport" = "587" ]; then
+    svport="2313"
+    echo "Phpmyadmin khong the trung voi port cua dich vu khac !"
+    echo "--------------------------------------------------------------------------"
+    echo "VPSSIM se dat phpmyadmin port la 2313"
+fi
+if [ "$svport" = "" ] ; then
+    clear
+    echo "=========================================================================="
+    echo "$svport khong duoc de trong."
+    echo "--------------------------------------------------------------------------"
+    echo "Ban hay kiem tra lai !" 
+    bash /etc/vpssim/.tmp/vpssim-setup
+    exit
+fi
+if ! [[ $svport -ge 100 && $svport -le 65535  ]] ; then  
+    clear
+    echo "=========================================================================="
+    echo "$svport khong hop le!"
+    echo "--------------------------------------------------------------------------"
+    echo "Port hop le la so tu nhien nam trong khoang (100 - 65535)."
+    echo "--------------------------------------------------------------------------"
+    echo "Ban hay kiem tra lai !" 
+    echo "-------------------------------------------------------------------------"
+    read -p "Nhan [Enter] de tiep tuc ..."
+    clear
+    bash /etc/vpssim/.tmp/vpssim-setup
+    exit
+fi 
+echo "--------------------------------------------------------------------------"
+echo -n "Nhap dia chi email quan ly [ENTER]: " 
+read vpssimemail
+if [ "$vpssimemail" = "" ]; then
+    clear
+    echo "=========================================================================="
+    echo "Ban nhap sai, vui long nhap lai!"
+    echo "-------------------------------------------------------------------------"
+    read -p "Nhan [Enter] de tiep tuc ..."
+    clear
+    bash /etc/vpssim/.tmp/vpssim-setup
+    exit
+fi
+
+if [[ ! "$vpssimemail" =~ $kiemtraemail3 ]]; then
+    clear
+    echo "=========================================================================="
+    echo "$vpssimemail co le khong dung dinh dang email!"
+    echo "--------------------------------------------------------------------------"
+    echo "Ban vui long thu lai  !"
+    echo "-------------------------------------------------------------------------"
+    read -p "Nhan [Enter] de tiep tuc ..."
+    clear
+    bash /etc/vpssim/.tmp/vpssim-setup
+    exit
+fi
 
 # Generate phpMyAdmin password
 matkhaubv=$(generate_password)
-
-echo "-------------------------------------------------------------------------"
-echo "Mật khẩu root của MySQL phải có ít nhất 8 ký tự và chỉ sử dụng chữ cái và số."
-echo "-------------------------------------------------------------------------"
 
 # Generate MySQL root password
 passrootmysql=$(generate_password)
 
 echo "-------------------------------------------------------------------------"
-echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
-echo "Mật khẩu root của MySQL: $passrootmysql"
+echo "Mat khau bao ve phpMyAdmin: $matkhaubv"
+echo "Mat khau root MySQL: $passrootmysql"
 echo "-------------------------------------------------------------------------"
-echo "Ban vui long thu lai !"
-echo "-------------------------------------------------------------------------"
-read -p "Nhan [Enter] de tiep tuc ..."
-clear
-bash /etc/vpssim/.tmp/vpssim-setup
-exit
 fi  
 
 prompt="Nhap lua chon cua ban: "
@@ -181,7 +169,9 @@ XXX=amd64
 else
 XXX=x86
 fi
-# Download vpssim_main_menu + Chmod
+
+# Download vpssim_main_menu
+mkdir -p /etc/vpssim
 cd /etc/vpssim
 download_vpssim_data () {
 rm -rf menu.zip
@@ -209,7 +199,6 @@ vpssim_version=`cat /etc/vpssim/.tmp/version.vpssim | awk '{print $3}'`
 
 # End Download Nginx, VPSSIM & phpMyadmin Version
 ###############################################################################
-
 clear
 prompt="Nhap lua chon cua ban: "
 options=("Nginx Mainline Version" "Nginx Stable Version")
@@ -254,9 +243,7 @@ echo "Nginx se duoc cai dat tu source"; sleep 2
 echo "Neu qua trinh cai dat that bai hoac gap loi "; sleep 4
 echo "VPSSIM se tu dong chuyen sang cai dat Nginx stable version tu Nginx Repo"; sleep 5
 fi
-
 clear
-
 echo "=========================================================================="
 echo "VPSSIM Se Cai Dat Server Theo Thong Tin:"
 echo "=========================================================================="
@@ -306,9 +293,10 @@ fi
 cat >> "/root/.bash_profile" <<END
 IPvpssimcheck="\$(echo \$SSH_CONNECTION | cut -d " " -f 1)"
 timeloginvpssimcheck=\$(date +"%e %b %Y, %a %r")
-echo 'Someone has IP address '\$IPvpssimcheck' login to $svip on '\$timeloginvpssimcheck'.' | mail -s 'eMail Notifications From VPSSIM On $svip' ${vpssimemail}
+echo 'Someone has IP address '\$IPvpssimcheck' login to $svip on '\$timeloginvpssimcheck'.' | mail -s 'eMail Notifications From VPSSIM On $svip ' ${vpssimemail}
 END
 echo "$svport" > /etc/vpssim/.tmp/priport.txt
+
 cat > "/etc/yum.repos.d/mariadb.repo" <<END
 # MariaDB $phienbanmariadb CentOS repository list
 # http://downloads.mariadb.org/mariadb/repositories/
@@ -323,15 +311,21 @@ END
 /etc/vpssim/menu/inc/disable-remove-service-vpssim-setup
 # Check & install remi repo
 /etc/vpssim/menu/inc/vpssim-check-and-install-remi-repo
-
+if [ ! -f /bin/vpssim ]; then
+clear
+echo "=========================================================================="
+echo "Qua trinh cai dat VPSSIM that bai !"
+echo "--------------------------------------------------------------------------"
+echo "VPSSIM khong the cai dat GLIBC 2.17 cho server cua ban. "
+echo "--------------------------------------------------------------------------"
+echo "Ban vui long rebuild lai server va chuyen sang Centos 7 va cai dat lai."
+echo "--------------------------------------------------------------------------"
+echo "Xin loi vi su bat tien nay !"
+echo "=========================================================================="
+exit
+fi
 mkdir -p /usr/local/vpssim
-
-# fix
 mkdir -p /etc/vpssim
-sudo chmod +x /usr/local/vpssim
-sudo chmod +x /etc/vpssim
-sudo chmod +x /usr/bin/calc
-
 groupadd nginx
 useradd -g nginx -d /dev/null -s /sbin/nologin nginx
 sudo yum -y groupinstall "Development Tools"
@@ -345,7 +339,6 @@ if [ "$nginxrepo" != "1" ];then
 echo "=========================================================================="
 echo "Download Nginx Module ... "
 echo "=========================================================================="
-sleep 3
 cd /usr/local/vpssim
 # /usr/local/vpssim/echo-nginx-module
 rm -rf echo-nginx-module*
@@ -429,15 +422,16 @@ unzip -oq ngx-fancyindex.zip
 rm -rf ngx-fancyindex.zip
 cd
 cd /usr/local/vpssim
-#cai dat  nginx
+#cai dat nginx
 wget --progress=dot http://nginx.org/download/nginx-${Nginx_VERSION}.tar.gz 2>&1 | grep --line-buffered "%"
 tar -xzf nginx-${Nginx_VERSION}.tar.gz
-rm -rf /usr/local/vpssim/nginx-${Nginx_VERSION}.tar.gz 
+rm -rf /usr/local/vpssim/nginx-${Nginx_VERSION}.tar.gz
 cd /usr/local/vpssim/nginx-${Nginx_VERSION}
-./configure --group=nginx --user=nginx \
---pid-path=/var/run/nginx.pid \
---prefix=/usr/share/nginx \
+./configure --prefix=/usr/share/nginx \
 --sbin-path=/usr/sbin/nginx \
+--group=nginx --user=nginx \
+--pid-path=/var/run/nginx.pid \
+--conf-path=/etc/nginx/nginx.conf \
 --with-http_v2_module \
 --with-http_ssl_module \
 --with-ipv6 \
@@ -453,17 +447,9 @@ cd /usr/local/vpssim/nginx-${Nginx_VERSION}
 --with-http_geoip_module=dynamic \
 --with-http_image_filter_module=dynamic \
 --with-http_perl_module=dynamic \
---with-ld-opt="-Wl,-E" \
 --with-mail=dynamic \
 --with-mail_ssl_module \
 --with-http_gunzip_module \
---with-http_gzip_static_module \
---with-file-aio \
---with-pcre-jit \
---with-google_perftools_module \
---with-debug \
---with-openssl-opt="enable-tlsext" \
---conf-path=/etc/nginx/nginx.conf \
 --with-http_gzip_static_module \
 --with-threads \
 --with-stream \
@@ -471,12 +457,18 @@ cd /usr/local/vpssim/nginx-${Nginx_VERSION}
 --with-stream_realip_module \
 --with-stream_geoip_module=dynamic \
 --with-stream_ssl_preread_module \
+--with-file-aio \
+--with-pcre=$moduledir/pcre-8.41 \
+--with-pcre-jit \
+--with-google_perftools_module \
+--with-debug \
+--with-openssl=$moduledir/${opensslversion} \
+--with-zlib=$moduledir/${zlibversion} \
+--with-openssl-opt="enable-tlsext" \
 --with-http_realip_module \
 --with-compat \
 --http-log-path=/var/log/nginx/access.log \
---with-zlib=$moduledir/${zlibversion} \
---with-openssl=$moduledir/${opensslversion} \
---with-pcre=$moduledir/pcre-8.41 \
+--with-http_stub_status_module \
 --add-dynamic-module=$moduledir/ngx_devel_kit-master \
 --add-dynamic-module=$moduledir/echo-nginx-module-master \
 --add-dynamic-module=$moduledir/memc-nginx-module-master \
@@ -546,10 +538,14 @@ if [ "$nginxrepo" != "1" ];then
 /etc/vpssim/menu/inc/vpssim-setup-nginx-from-repo
 fi
 ################################################################################
+
+clear
 echo "=========================================================================="
-echo "Cai Dat Hoan Tat, Bat Dau Qua Trinh Cau Hinh...... "
+echo "Cai Dat Hoan Tat, Bat Dau Qua Trinh Cau Hinh... "
 echo "=========================================================================="
 sleep 3
+
+
 	ramformariadb=$(calc $svram/10*6)
 	ramforphpnginx=$(calc $svram-$ramformariadb)
 	max_children=$(calc $ramforphpnginx/30)
@@ -557,13 +553,18 @@ sleep 3
 	mem_apc=$(calc $ramforphpnginx/5)M
 	buff_size=$(calc $ramformariadb/10*8)M
 	log_size=$(calc $ramformariadb/10*2)M
-	
 
-systemctl enable  syslog-ng.service
-systemctl enable php-fpm.service 
-systemctl start php-fpm.service
-systemctl enable mysql.service
-systemctl enable nginx.service 
+
+chkconfig --add mysql
+chkconfig --levels 235 mysql on
+chkconfig --add nginx
+chkconfig --levels 235 nginx on
+chkconfig --add php-fpm
+chkconfig --levels 235 php-fpm on
+chkconfig --add exim
+chkconfig --levels 235 exim on
+chkconfig --add syslog-ng
+chkconfig --levels 235 syslog-ng on
 
 mkdir -p /home/vpssim.demo/public_html
 mkdir /home/vpssim.demo/private_html
@@ -585,7 +586,6 @@ sed -i "s/portbimat/$svport/g" /etc/nginx/conf.d/vpssim.demo.conf
 
 #Config www.conf & php.ini
 /etc/vpssim/menu/inc/config-php.ini-www.conf-belong-ram
-
 if [ ! -d /home/0-VPSSIM-SHORTCUT ];then
 mkdir -p /home/0-VPSSIM-SHORTCUT
 mkdir -p /home/vpssim.demo/private_html/backup
@@ -602,12 +602,6 @@ ver=7
 fi
 /etc/vpssim/menu/inc/config-opcache.ini-sysctl.conf-php-fpm.conf-limits.conf-belong-ram-cpu-centos$ver
 ##################################################################
-if [ ! "$(grep LANG=en_US.utf-8 /etc/environment)" == "LANG=en_US.utf-8" ]; then
-cat > "/etc/environment" <<END
-LANG=en_US.utf-8
-LC_ALL=en_US.utf-8
-END
-fi
 rm -f /home/vpssim.conf
     cat > "/home/vpssim.conf" <<END
 mainsite="vpssim.demo"
@@ -616,6 +610,13 @@ serverip="$svip"
 mariadbpass="$passrootmysql"
 emailmanage="$vpssimemail"
 END
+
+if [ ! "$(grep LANG=en_US.utf-8 /etc/environment)" == "LANG=en_US.utf-8" ]; then
+cat > "/etc/environment" <<END
+LANG=en_US.utf-8
+LC_ALL=en_US.utf-8
+END
+fi
 # Config server.cnf
 /etc/vpssim/menu/inc/config-server.cnf-belong-ram
 /etc/vpssim/menu/inc/set-mysql-chown-log
@@ -627,8 +628,8 @@ service mysql start
 #echo "Dat Mat Khau Cho Tai Khoan root Cua MYSQL ... "
 #echo "=========================================================================="
 /etc/vpssim/menu/inc/mysql-secure-installation
-#clear
-##echo "=========================================================================="
+clear
+#echo "=========================================================================="
 #echo "Cai dat phpMyAdmin... "
 #echo "=========================================================================="
 /etc/vpssim/menu/inc/phpmyadmin-download
@@ -664,6 +665,7 @@ fi
 if [ ! -f /etc/nginx/.htpasswd ]; then
 htpasswd -b -c /etc/nginx/.htpasswd $usernamebv $matkhaubv
 fi
+
 chmod -R 644 /etc/nginx/.htpasswd
 cat > "/etc/vpssim/pwprotect.default" <<END
 userdefault="$usernamebv"
@@ -689,13 +691,13 @@ if [ ! -f /usr/share/GeoIP/GeoIP.dat ]; then
 cp /etc/vpssim/menu/inc/geoip/GeoIP.dat /usr/share/GeoIP/
 fi
 ####################################################
+####################################################
 ## Setting Server Timezone & PHP Timezone
 /etc/vpssim/menu/inc/vpssim-server-timzone-php-timezone
 ## IPtables Settings
 /etc/vpssim/menu/inc/vpssim-iptables-setting
 /etc/vpssim/menu/inc/thong-bao-finished-cai-dat
-rm -rf /root/install*
-
+rm -rf /root/glibc-*
 
 # increase SSH login speed
 if [ -f /etc/ssh/sshd_config ]; then 
@@ -704,10 +706,6 @@ sed -i 's/#UseDNS yes/UseDNS no/g' /etc/ssh/sshd_config
 fi
 mkdir -p /var/cache/ngx_pagespeed
 chown -R nginx:nginx /var/cache/ngx_pagespeed
-#Change default folder ssh login
-#if [ -f /root/.bash_profile ]; then
-#sed -i "/.*#\ .bash_profile.*/acd /home" /root/.bash_profile
-#fi
 ## Bat nginx & Php-FPM
 /etc/vpssim/menu/inc/vpssim-thong-bao-vpssim-update-config
 /etc/vpssim/menu/inc/vpssim-tao-shortcut-command-ng-mql-phpfpm
@@ -740,6 +738,6 @@ echo "Nhung viec nen lam sau khi them website vao VPS: http://go.vpssim.vn/1138"
 echo ""
 echo "--------------------------------------------------------------------------"
 echo "Server se khoi dong lai sau 3 giay.... "
-sleep 16
+sleep 3
 reboot
 exit
