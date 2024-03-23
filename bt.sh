@@ -73,12 +73,6 @@ Install_Check(){
 	echo -e "检查已有其他Web/mysql环境，安装宝塔可能影响现有站点及数据"
 	echo -e "Web/mysql service is alreday installed,Can't install panel"
 	echo -e "----------------------------------------------------"
-	echo -e "已知风险/Enter yes to force installation"
-	read -p "输入yes强制安装: " yes;
-	if [ "$yes" != "yes" ];then
-		echo -e "------------"
-		echo "取消安装"
-		exit;
 	fi
 	INSTALL_FORCE="true"
 }
@@ -716,16 +710,18 @@ echo "
 +----------------------------------------------------------------------
 | The WebPanel URL will be http://SERVER_IP:8888 when installed.
 +----------------------------------------------------------------------
-"
+# Automatically respond 'y' when prompted to install Bt-Panel
+go='y'
+
+# Check if the response is 'y' or 'n'
 while [ "$go" != 'y' ] && [ "$go" != 'n' ]
 do
-	read -p "Do you want to install Bt-Panel to the $setup_path directory now?(y/n): " go;
+    read -p "Do you want to install Bt-Panel to the $setup_path directory now? (y/n): " go
 done
 
-if [ "$go" == 'n' ];then
-	exit;
+if [ "$go" == 'n' ]; then
+    exit
 fi
-
 Install_Main
 
 echo > /www/server/panel/data/bind.pl
