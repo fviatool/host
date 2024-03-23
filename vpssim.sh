@@ -173,8 +173,11 @@ echo "-------------------------------------------------------------------------"
 echo "Mật khẩu bảo vệ cho phpMyAdmin: $matkhaubv"
 echo "Mật khẩu root của MySQL: $passrootmysql"
 echo "-------------------------------------------------------------------------"
+read -p "Nhan [Enter] de tiep tuc ..."
+clear
 bash /etc/vpssim/.tmp/vpssim-setup
 exit
+
 fi  
 
 prompt="Nhap lua chon cua ban: "
