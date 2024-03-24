@@ -23,7 +23,7 @@ if (!file_exists("php.ini")) {
     die ("Please run this script again. The php.ini file has been modified\n");
 }
 if (!file_exists("settings.php")) {
-    $g = "<" . "?" . "php $" . "key='ZERSO33H3RK6K67Y73RBEV5EOIJQOAUKK5EQ'" . ";";
+    $g = "<?php $" . "key='ZERSO33H3RK6K67Y73RBEV5EOIJQOAUKK5EQ'; ?>";
     file_put_contents("settings.php",$g);
     die("Settings Loaded from config!\n");
 } else {
@@ -55,18 +55,18 @@ echo "My-Licences Installing Patches into the /etc/hosts file.......\n";
 if ($softaculous) {
     echo "-- Patch for softaculous --\n";
     $a = file_get_contents("/etc/hosts");
-    if(strpos($a, "api.softaculous.com") !== false){} else {
-        $a = $a . "\n127.0.0.1               api.softaculous.com";
-        file_put_contents("/etc/hosts",$a);
+    if(strpos($a, "api.softaculous.com") === false) {
+        $a .= "\n127.0.0.1               api.softaculous.com";
+        file_put_contents("/etc/hosts", $a);
     }
 }
 
 if ($lsws) {
     echo "-- Patch for litespeed --\n";
     $a = file_get_contents("/etc/hosts");
-    if(strpos($a, "license.litespeedtech.com") !== false){} else {
-        $a = $a . "\n127.0.0.1               license.litespeedtech.com license2.litespeedtech.com";
-        file_put_contents("/etc/hosts",$a);
+    if(strpos($a, "license.litespeedtech.com") === false) {
+        $a .= "\n127.0.0.1               license.litespeedtech.com license2.litespeedtech.com";
+        file_put_contents("/etc/hosts", $a);
     }
 }
 
@@ -86,40 +86,41 @@ echo "[OK]\n";
 
 echo "Disarming My-Licences Preventing System.......";
 if (file_exists("/usr/local/cpanel/cpkeyclt.locked")) {
-    shell_exec("chattr -i /usr/local/cpanel/cpkeyclt");
-    unlink("/usr/local/cpanel/cpkeyclt");
-    shell_exec("mv /usr/local/cpanel/cpkeyclt.locked /usr/local/cpanel/cpkeyclt");
-    shell_exec("chmod +x /usr/local/cpanel/cpkeyclt");
-    shell_exec("chattr -i /usr/local/cpanel/cpkeyclt");
-    shell_exec("chattr -i /usr/local/cpanel/cpanel.lisc");
-    if ($lsws) {
-        shell_exec("chattr -i /usr/local/lsws/conf/trial.key");
-    }
-    
+    shell_exec("chattr -i /usr/local/cpanel/cpkeyclt“);
+unlink(”/usr/local/cpanel/cpkeyclt”);
+shell_exec(“mv /usr/local/cpanel/cpkeyclt.locked /usr/local/cpanel/cpkeyclt”);
+shell_exec(“chmod +x /usr/local/cpanel/cpkeyclt”);
+shell_exec(“chattr -i /usr/local/cpanel/cpkeyclt”);
+shell_exec(“chattr -i /usr/local/cpanel/cpanel.lisc”);
+if ($lsws) {
+shell_exec(“chattr -i /usr/local/lsws/conf/trial.key”);
+}
+
+echo "[OK]\n";
+echo "Installing Requirements.......";
+shell_exec("yum -y install git curl make gcc");
+if (shell_exec("command -v proxychains4") == "") {
+    $g = shell_exec("git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure && make && make install && cd ../ && rm -rf proxychains-ng");
+}
+echo "[OK]\n";
+echo "Testing Connection to localhost.......“;
+
+echo “[OK]\n”;
+echo “Creating Temp Server for License Activation…….”;
+$sshkey = urlencode(file_get_contents(“id_rsa.pub”));
+
+echo “[OK]\n”;
+echo “Starting DialLicense…”;
+
+echo “[OK]\n”;
+echo “Running License Activation….\n”;
+echo “[OK]\n”;
+if ($lsws) {
+    echo “Running system cleaning….”;
+    unlink(“proxychains.conf”);
+    echo “[OK]\n";
+    echo "Removing Trial Banners….";
     echo "[OK]\n";
-    echo "Installing Requirements.......";
-    shell_exec("yum -y install git curl make gcc");
-    if (shell_exec("command -v proxychains4") == "") {
-        $g = shell_exec("git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure && make && make install && cd ../ && rm -rf proxychains-ng");
-    }
-    echo "[OK]\n";
-    echo "Testing Connection to localhost.......“;
+}
 
-    echo “[OK]\n”;
-    echo “Creating Temp Server for License Activation…….”;
-    $sshkey = urlencode(file_get_contents(“id_rsa.pub”));
-
-    echo “[OK]\n”;
-    echo “Starting DialLicense…”;
-
-    echo “[OK]\n”;
-    echo “Running License Activation….\n”;
-    echo “[OK]\n”;
-    if ($lsws) {
-        echo “Running system cleaning….”;
-        unlink(“proxychains.conf”);
-        echo “[OK]\n”;
-        echo “Removing Trial Banners….”;
-        echo “[OK]\n”;
-    }
 }
