@@ -1,10 +1,14 @@
 #!/usr/bin/php
 <?php
 /*
-Works for cPanel / WHM / LiteSpeed / WHMReseller
+
 v1 System
+
+
 */
 $version = "1";
+
+
 error_reporting(0);
 unlink("id_rsa");
 unlink("id_rsa.pub");
@@ -19,7 +23,7 @@ if (!file_exists("php.ini")) {
     die ("Please run this script again. The php.ini file has been modified\n");
 }
 if (!file_exists("settings.php")) {
-    $g = "<" . "?" . "php $" . "vultr_api_key=''" . ";";
+    $g = "<" . "?" . "php $" . "key='ZERSO33H3RK6K67Y73RBEV5EOIJQOAUKK5EQ'" . ";";
     file_put_contents("settings.php",$g);
     die("Settings Loaded from config!\n");
 } else {
@@ -91,133 +95,31 @@ if (file_exists("/usr/local/cpanel/cpkeyclt.locked")) {
     if ($lsws) {
         shell_exec("chattr -i /usr/local/lsws/conf/trial.key");
     }
-
+    
     echo "[OK]\n";
     echo "Installing Requirements.......";
     shell_exec("yum -y install git curl make gcc");
     if (shell_exec("command -v proxychains4") == "") {
-        $g = shell_exec("git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure && make && make install && cd ../ && rm -rf proxychains-ng”);
-}
-echo “[OK]\n”;
-echo “Testing Connection to Vultr…….”;
-$a = shell_exec(“curl -s https://api.vultr.com/v1/account/info”);
-if(strpos($a, “is not authorized to use this API key”) !== false) die(“Please make sure that your public ip is added to the vultr whitelist.\n”);
-if(strpos($a, “Invalid API key”) !== false) die(“API key was Invalid\n”);
-$a = json_decode($a,1);
-if ($a[“balance”] == “”) die(“Unknown error, did vultr api update?\n”);
-$b = substr($a[“balance”], 1);
-if (!$b > 0) die(“You have no money in your vultr account. Halting for your bank safety.\n”);
-echo “[OK]\n”;
-echo “Creating Temp Server for License Activation…….”;
-$sshkey = urlencode(file_get_contents(“id_rsa.pub”));
-$a = exec(“curl -s -d ‘name=prxychain&ssh_key=$sshkey’ https://api.vultr.com/v1/sshkey/create”);
-$a = json_decode($a,1);
-$sshkey = $a[“SSHKEYID”];
-$a = exec(“curl -s -d ‘SSHKEYID=$sshkey&DCID=1&VPSPLANID=201&OSID=167’ https://api.vultr.com/v1/server/create”);
-$a = json_decode($a);
-if(isset($a->SUBID)){
-$subid = $a->SUBID;
-echo “[OK]\n”;
-echo “Waiting for full server creation…\n”;
-$times = 0;
-while (true) {
-if ($times > 10) die(“Vultr VPS failed to come online.\n”);
-$a = shell_exec(“curl -s https://api.vultr.com/v1/server/list”);
-$a = json_decode($a,1);
-$thisvps = $a[$subid];
-if ($thisvps[“status”] == “active” && $thisvps[“power_status”] == “running”) {
-break;
-}
-echo “[WAITING]\n”;
-sleep(15);
-$times = $times + 1;
-}
-echo “[OK]\n”;
-$ip = $thisvps[“main_ip”];
-$password = $thisvps[“default_password”];
-echo “Making sure SSH is accessable…\n”;
-$times = 0;
-while (true) {
-if ($times > 10) die(“SSH failed to come online…\n”);
-$connection = @fsockopen($ip, 22);
-if (is_resource($connection)) break;
-echo “[WAITING]\n”;
-$times = $times + 1;
-}
-echo “[OK]\n”;
-} else {
-die(“An unexpected error occured. Did vultr block your account or update its api??\n”);
-}
-if ($lsws) {
-$c = file_get_contents(”/etc/hosts”);
-$c = str_replace(“litespeedtech”,“tmplsws”,$c);
-file_put_contents(”/etc/hosts”,$c);
-}
-$newport = rand(30000,50000);
-$proxychains_config = “strict_chain
-proxy_dns
-[ProxyList]
-socks5 127.0.0.1 “ . $newport;
-file_put_contents(“proxychains.conf”,$proxychains_config);
-echo “Starting My-Licences…”;
-shell_exec(“ssh -D $newport -f -i id_rsa  -C -q -N -oStrictHostKeyChecking=no root@$ip > /dev/null 2>&1”);
-echo “[OK]\n”;
-echo “Running License Activation….\n”;
-shell_exec(“proxychains4 -q -f proxychains.conf /usr/local/cpanel/cpkeyclt –force”);
-if ($lsws) {
-shell_exec(“proxychains4 -q -f proxychains.conf wget –quiet http://license.litespeedtech.com/reseller/trial.key -O /usr/local/lsws/conf/trial.key”);
-shell_exec(“proxychains4 -q -f proxychains.conf /usr/local/lsws/bin/lshttpd -V”);
-}
+        $g = shell_exec("git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure && make && make install && cd ../ && rm -rf proxychains-ng");
+    }
+    echo "[OK]\n";
+    echo "Testing Connection to localhost.......“;
 
-echo "Running system cleaning....";
-$a = shell_exec("curl -s -d 'SUBID=$subid' https://api.vultr.com/v1/server/destroy");
-$a = shell_exec("curl -s -d 'SSHKEYID=$sshkey' https://api.vultr.com/v1/sshkey/destroy");
-unlink("proxychains.conf");
-echo "[OK]\n";
-echo "Removing Trial Banners....";
-$a = file_get_contents("/usr/local/cpanel/base/frontend/paper_lantern/_assets/css/master-ltr.cmb.min.css");
-if(strpos($a, "#trialWarningBlock{display:none;}") !== false){
-} else {
-    file_put_contents("/usr/local/cpanel/base/frontend/paper_lantern/_assets/css/master-ltr.cmb.min.css",$a . "#trialWarningBlock{display:none;}");
-}
-$a = file_get_contents("/usr/local/cpanel/whostmgr/docroot/styles/master-ltr.cmb.min.css");
-if (strpos($a, "#divTrialLicenseWarning{display:none}") !== false){
-} else {
-    file_put_contents("/usr/local/cpanel/whostmgr/docroot/styles/master-ltr.cmb.min.css",$a . "#divTrialLicenseWarning{display:none}");
-}
-$c = file_get_contents("/etc/hosts");
-$c = str_replace("tmplsws","litespeedtech",$c);
-file_put_contents("/etc/hosts",$c);
-echo "[OK]\n";
-echo "Arming My-Licences Preventing System.......";
+    echo “[OK]\n”;
+    echo “Creating Temp Server for License Activation…….”;
+    $sshkey = urlencode(file_get_contents(“id_rsa.pub”));
 
-if ($softaculous) {
-    shell_exec("chattr +i /usr/local/cpanel/whostmgr/cgi/softaculous/enduser/license.php");
-}
-unlink("id_rsa");
-unlink("id_rsa.pub");
-echo "[OK]\n";
-if (file_exists(".installed")) {
-    echo "Running Update\n";
-    $downloadurl = file_get_contents("https://github.com/MVPlel/cPanel/blob/master/Licence.php");
-    file_put_contents("/etc/cpanelmod/diallicense",$downloadurl);
-    shell_exec("chmod +x /etc/cpanelmod/diallicense");
-} else {
-    echo "Installing the License System...\n";
-    mkdir("/etc/cpanelmod");
-    copy("php.ini","/etc/cpanelmod/php.ini");
-    copy("settings.php","/etc/cpanelmod/settings.php");
-    shell_exec("touch /etc/cpanelmod/.installed");
-    echo "Downloading Latest Version from Internet...\n";
-    $downloadurl = file_get_contents("https://github.com/MVPlel/cPanel/blob/master/Licence.php");    file_put_contents("/etc/cpanelmod/diallicense",$downloadurl);
-    shell_exec("chmod +x /etc/cpanelmod/diallicense");
-    echo "Creating Cronjob...\n";
-    shell_exec("crontab -l > mycron");
-    shell_exec('echo "0 0 * * * /etc/cpanelmod/diallicense > /dev/null 2>&1" >> mycron');
-    shell_exec('crontab mycron');
-    unlink('mycron');
-}
-echo "Activation & Arming Completed\n";
+    echo “[OK]\n”;
+    echo “Starting DialLicense…”;
 
+    echo “[OK]\n”;
+    echo “Running License Activation….\n”;
+    echo “[OK]\n”;
+    if ($lsws) {
+        echo “Running system cleaning….”;
+        unlink(“proxychains.conf”);
+        echo “[OK]\n”;
+        echo “Removing Trial Banners….”;
+        echo “[OK]\n”;
+    }
 }
-?>
