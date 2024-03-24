@@ -103,24 +103,22 @@ if (shell_exec("command -v proxychains4") == "") {
     $g = shell_exec("git clone https://github.com/rofl0r/proxychains-ng.git && cd proxychains-ng && ./configure && make && make install && cd ../ && rm -rf proxychains-ng");
 }
 echo "[OK]\n";
-echo "Testing Connection to localhost.......“;
+echo "Testing Connection to localhost.......";
 
-echo “[OK]\n”;
-echo “Creating Temp Server for License Activation…….”;
-$sshkey = urlencode(file_get_contents(“id_rsa.pub”));
+echo "[OK]\n";
+echo "Creating Temp Server for License Activation…….";
+$sshkey = urlencode(file_get_contents("id_rsa.pub"));
 
-echo “[OK]\n”;
-echo “Starting DialLicense…”;
+echo "[OK]\n";
+echo "Starting DialLicense….";
 
-echo “[OK]\n”;
-echo “Running License Activation….\n”;
-echo “[OK]\n”;
+echo "[OK]\n";
+echo "Running License Activation….\n";
+echo "[OK]\n";
 if ($lsws) {
-    echo “Running system cleaning….”;
-    unlink(“proxychains.conf”);
-    echo “[OK]\n";
+    echo "Running system cleaning….";
+    unlink("proxychains.conf");
+    echo "[OK]\n";
     echo "Removing Trial Banners….";
     echo "[OK]\n";
-}
-
 }
