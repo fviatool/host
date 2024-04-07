@@ -57,9 +57,7 @@ execute_command "sudo service httpd restart"
 # Install Perl
 display_message "Installing Perl..."
 execute_command "sudo yum install perl"
-
-# Install cPanel
-display_message "Downloading and installing cPanel..."
+execute_command "cd /home"
 execute_command "curl -o latest -L https://securedownloads.cpanel.net/latest"
 execute_command "sudo sh latest"
 
