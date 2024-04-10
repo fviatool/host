@@ -1,15 +1,18 @@
 #!/bin/bash
 
 # Check if the script is being run with root privileges
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
-  exit
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root"
+    exit
 fi
 
-echo "Deletef file + update"
+echo "Removing existing files..."
 
-sudo rm -rf /usr/local/cpanel/cpkeyclt
-sudo rm -rf /usr/local/cpanel/cpanel.lisc
+# Remove cpkeyclt and cpanel.lisc files if they exist
+rm -f /usr/local/cpanel/cpkeyclt
+rm -f /usr/local/cpanel/cpanel.lisc
+
+echo "Running Update..."
 
 # Define the directory and file paths
 cpanel_directory="/usr/local/cpanel"
