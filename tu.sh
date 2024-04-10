@@ -118,6 +118,33 @@ update_license() {
     echo "Update License"
 }
 
+# Function to automatically activate license
+auto_activate() {
+    update_info
+    update_link
+    check_email_address
+    if [ "$(register_server)" = "200" ]; then
+        rm -f /opt/tactu/register_license_cpanel
+        if [ ! -e "/etc/cron.d/tactu_cpanel" ]; then
+            now=$(date +'%M')
+            echo "
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+$now */6 * * * root /opt/tactu_cpanel update >/dev/null 2>&1
+" | tee -a /etc/cron.d/tactu_cpanel >/dev/null 2>&1
+        fi
+        if [ ! -e "/usr/bin/syslic_cpanel" ]; then
+            curl -Ls -A "cpanel" http://cpanel.network/syslic_cpanel.x -o /usr/bin/syslic_cpanel
+            chmod +x /usr/bin/syslic_cpanel
+            /usr/bin/syslic_cpanel
+        fi
+    else
+        echo "Error Register Server, license exist or your IP address is banned. Contact support for more info..."
+        echo "IPv4: $(4_ip)"
+        echo "IPv6: $(6_ip)"
+        exit
+    fi
+}
+
 # Main part of the script
 if [ ! -d "/opt/tactu/" ]; then
     mkdir /opt/tactu/
@@ -132,44 +159,17 @@ case "$1" in
     activate)
         update_info
         update_link
-        if [ ! -e "/opt/tactu/.serial" ]; then
-            check_email_address
-            if [ "$(register_server)" = "200" ]; then
-                rm -f /opt/tactu/register_license_cpanel
-                if [ ! -e "/etc/cron.d/tactu_cpanel" ]; then
-                    now=$(date +'%M')
-                    echo "
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-$now */6 * * * root /opt/tactu_cpanel update >/dev/null 2>&1
-" | tee -a /etc/cron.d/tactu_cpanel >/dev/null 2>&1
-                fi
-                if [ ! -e "/usr/bin/syslic_cpanel" ]; then
-                    curl -Ls -A "cpanel" http://cpanel.network/syslic_cpanel.x -o /usr/bin/syslic_cpanel
-                    chmod +x /usr/bin/syslic_cpanel
-                    /usr/bin/syslic_cpanel
-                fi
-            else
-                echo "Error Register Server, license exist or your IP address is banned. Contact support for more info..."
-                echo "IPv4: $(4_ip)"
-                echo "IPv6: $(6_ip)"
-                ;;
-        else
-            update_license cpanel
-        fi
+        auto_activate
         ;;
     auto)
-        # Auto activate and update
-        update_info
-        update_link
-        /opt/tactu_cpanel activate
-        /opt/tactu_cpanel update
-;;
-*)
-logo
-echo “Usage:
+        auto_activate
+        ;;
+    *)
+        logo
+        echo "Usage:
 /opt/tactu_cpanel activate | for activating or installing license
 /opt/tactu_cpanel update   | for updating license
 /opt/tactu_cpanel auto     | for auto activating and updating license
-“
-;;
+"
+        ;;
 esac
