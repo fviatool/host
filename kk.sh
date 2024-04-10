@@ -6,6 +6,12 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+echo "Removing existing files..."
+
+# Remove cpkeyclt and cpanel.lisc files if they exist
+rm -f /usr/local/cpanel/cpkeyclt
+rm -f /usr/local/cpanel/cpanel.lisc
+
 echo "Running Update"
 
 # Define the directory and file paths
