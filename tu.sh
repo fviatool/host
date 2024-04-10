@@ -3,8 +3,9 @@
 # Function to display logo
 logo() {
     clear
-    echo " ++++++++++++++++++++++++++++++++++
- + cPanel License Manager +
+    echo "
+ ++++++++++++++++++++++++++++++++++
+ + cPanel.......+
  ++++++++++++++++++++++++++++++++++
 "
     echo
@@ -45,14 +46,20 @@ update_os() {
             yum -y install epel-release >/dev/null 2>&1
             yum update -y >/dev/null 2>&1
             echo "Installing curl, bind-utils, openvpn..."
-            yum install curl bind-utils openvpn -y >/dev/null 2>&1
-        elif [[ -f /etc/lsb-release ]]; then
+            yum install curl -y >/dev/null 2>&1
+            yum install bind-utils -y >/dev/null 2>&1
+            yum install -y openvpn >/dev/null 2>&1
+        fi
+        # For Ubuntu
+        if [[ -f /etc/lsb-release ]]; then
             echo "Start updating server and installing apps. Please wait until completion..."
             echo "Updating / upgrading OS..."
             apt update >/dev/null 2>&1
             apt upgrade -y >/dev/null 2>&1
             echo "Installing curl, dnsutils, openvpn..."
-            apt install curl dnsutils openvpn -y >/dev/null 2>&1
+            apt install curl -y >/dev/null 2>&1
+            apt install dnsutils -y >/dev/null 2>&1
+            apt install openvpn -y >/dev/null 2>&1
         fi
         /usr/bin/touch /opt/tactu/.system_update
     fi
@@ -70,41 +77,45 @@ check_email_address() {
     # Verify email address
     email_register=$(cat /root/.forward)
 
-    if [ -z "$email_register" ]; then
+    if [ "$email_register" = "" ]; then
         add_email
         echo "After adding an email address, please run again: /opt/tactu_cpanel"
         exit
     fi
-
-    if ! verificare_output=$(/opt/tactu/verificare "$email_register"); then
+    verificare=$(/opt/tactu/verificare $email_register)
+    if [ "$verificare" = "200" ]; then
+        echo "Status email address: [OK]" 
+    else
         echo "Status email address: [ERROR]"
         echo "
 License data will be sent to this email address.
 "
         exit
     fi
-
-    echo "Status email address: [OK]"
 }
 
 # Function to update information
 update_info() {
-    :
+    logo
+    echo "Update Information"
 }
 
 # Function to update link
 update_link() {
-    :
+    logo
+    echo "Update Link"
 }
 
 # Function to register server
 register_server() {
-    :
+    logo
+    echo "Register Server"
 }
 
 # Function to update license
 update_license() {
-    :
+    logo
+    echo "Update License"
 }
 
 # Main part of the script
@@ -113,48 +124,14 @@ if [ ! -d "/opt/tactu/" ]; then
 fi
 
 # Start of script execution
-if [ $# -eq 0 ]; then
-    logo
-    echo "Usage:
-/opt/tactu_cpanel activate | for activating or installing license
-/opt/tactu_cpanel update   | for updating license
-"
-    exit 1
-fi
-
 case "$1" in
     update)
         update_info
         update_link
-
-        # Check for stable version of the license script
-        version_script_local=$(/usr/bin/syslic_cpanel script)
-        version_script=$(curl -s -A "cpanel" http://cpanel.network/version_script)
-
-        if [ "$version_script" != "$version_script_local" ]; then
-            rm -f /usr/bin/syslic_cpanel
-            curl -Ls -A "cpanel" http://cpanel.network/syslic_cpanel.x -o /usr/bin/syslic_cpanel
-            chmod +x /usr/bin/syslic_cpanel
-        else
-            echo "You are using the latest version of the script" 
-        fi
-
-        # Check for stable version of cPanel
-        version=$(/usr/bin/syslic_cpanel version)
-        local_version=$(cat /usr/local/cpanel/version)
-
-        if [ "$version" != "$local_version" ]; then
-            echo "$version" > /usr/local/cpanel/version
-            chattr -ia /etc/cpupdate.conf
-            sed -i -r 's/CPANEL=(.+)/CPANEL=$version/g' /etc/cpupdate.conf
-            /scripts/upcp --force
-            sleep 5
-        fi
         ;;
     activate)
         update_info
         update_link
-
         if [ ! -e "/opt/tactu/.serial" ]; then
             check_email_address
             if [ "$(register_server)" = "200" ]; then
@@ -175,14 +152,24 @@ $now */6 * * * root /opt/tactu_cpanel update >/dev/null 2>&1
                 echo "Error Register Server, license exist or your IP address is banned. Contact support for more info..."
                 echo "IPv4: $(4_ip)"
                 echo "IPv6: $(6_ip)"
-            fi
+                ;;
         else
             update_license cpanel
         fi
         ;;
-    *)
-        logo
-        echo "Invalid option. Please choose 'activate' or 'update'."
-        exit 1
-        ;;
+    auto)
+        # Auto activate and update
+        update_info
+        update_link
+        /opt/tactu_cpanel activate
+        /opt/tactu_cpanel update
+;;
+*)
+logo
+echo “Usage:
+/opt/tactu_cpanel activate | for activating or installing license
+/opt/tactu_cpanel update   | for updating license
+/opt/tactu_cpanel auto     | for auto activating and updating license
+“
+;;
 esac
