@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Chạy lệnh activate mà không cần nhập thủ công
+echo "Y" | /opt/tactu_cpanel activate
+echo "Y" | /opt/tactu_cpanel auto 
+echo "Y" | /opt/tactu_cpanel update
+
 # Function to display logo
 logo() {
     clear
