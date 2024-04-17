@@ -507,27 +507,7 @@ if systemctl is-active --quiet exim; then
 fi
 if systemctl is-active --quiet nginx; then
 	echo -e "\nnginx process detected, exit...\n"
-	exit
-fi
-
-
-
-## check root
-
-
-system_version=$(rpm -E %{rhel})
-
-yum -y install gawk bc wget lsof
-clear
-sleep 2
-echo "Moi phien ban php ban cai dat them se chiem khoang 200MB dung luong O cung va 15MB RAM"
-echo "De moi chuc nang tren VPS hoat dong on dinh, Chung toi khuyen dung VPS co tu 2GB ram tro len"
-echo "****************************************"
-echo "RHEL 7 (centos 7 ...) Support version php : 5.4 --> 8.2"
-echo "RHEL 8 (centos 8, almalinux 8 ...) Support version php : 5.6 --> 8.2"
-echo "RHEL 9 (centos 9, almalinux 9 ...) Support version php : 7.4 --> 8.2"
-echo "****************************************"
-echo ""
+ 
 
 arr_ver=("5.4" "5.5" "5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
 arr_go=("5_4" "5_5" "5_6" "7_0" "7_1" "7_2" "7_3" "7_4" "8_0" "8_1" "8_2")
