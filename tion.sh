@@ -515,12 +515,6 @@ fi
 ## check root
 
 
-if [ "x$(id -u)" != 'x0' ]; then
-    echo 'Tino Script phai chay voi quyen root'
-    exit 1
-fi
-
-
 system_version=$(rpm -E %{rhel})
 
 yum -y install gawk bc wget lsof
@@ -534,8 +528,6 @@ echo "RHEL 8 (centos 8, almalinux 8 ...) Support version php : 5.6 --> 8.2"
 echo "RHEL 9 (centos 9, almalinux 9 ...) Support version php : 7.4 --> 8.2"
 echo "****************************************"
 echo ""
-printf "Vui long tuy chon phien ban php ban muon cai dat ben duoi:\n"
-
 
 arr_ver=("5.4" "5.5" "5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2")
 arr_go=("5_4" "5_5" "5_6" "7_0" "7_1" "7_2" "7_3" "7_4" "8_0" "8_1" "8_2")
