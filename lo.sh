@@ -29,6 +29,15 @@ sudo apachectl configtest
 
 # Nếu không có lỗi, khởi động lại dịch vụ Apache
 sudo systemctl restart httpd
+sudo yum install -y epel-release yum-utils
+sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+sudo yum-config-manager --enable remi-php74
+sudo yum install -y php php-common php-cli php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json
 
+# Cài đặt gói IMAP cho PHP
+sudo yum install -y php-imap
+
+# Khởi động lại Apache để áp dụng các thay đổi
+sudo systemctl restart httpd
 # Hiển thị thông báo hoàn thành
 echo "Trang localhost đã được thiết lập thành công."
