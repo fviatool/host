@@ -3,7 +3,7 @@ License Version: 31
 fields: server_version=31,rhel=cdc4d84,cid=336,vps=1,server=42,
 products: cpanel
 features: teams
-client: 217.20.240.2
+client: 14.224.163.75
 support_expire_time: 0
 updates_expire_time: 0
 license_expire_time: 2532447600
