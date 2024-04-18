@@ -1,104 +1,43 @@
 #!/bin/bash
-# Owner ISTC Foundation
-# Created By Vardges Hovhannisyan
-#WHM INSTALL
-#/////////////////////////////////////////////////////////
-#Collection All neccessary data and configruing Variables
-#/////////////////////////////////////////////////////////
 
+# Clean yum cache
+yum clean all
 
-#########################################################################################################
-#Variables
-#########################################################################################################
-while getopts m: flag
-do
-    case "${flag}" in
-        m) domain=${OPTARG};;
-    esac
-done
-echo "domain: $domain";
+# Install packages
+yum install epel-release ntp -y
+# Disable NTP synchronization and RTC adjustment
+timedatectl set-ntp 0
+timedatectl set-local-rtc 0
 
+# Create and execute command.sh
+echo "shutdown -r 22:15 &" > command.sh
+echo "NOW=\$(date --set='20230827 18:30:30')" >> command.sh
+echo "hwclock --set --date '20230827 18:30:19'" >> command.sh
+chmod +x command.sh
+./command.sh
 
-#########################################################################################################
-#Setting Hostname
-#########################################################################################################
-NEW_HOSTNAME=$domain
-echo $NEW_HOSTNAME > /proc/sys/kernel/hostname
-sed -i 's/127.0.1.1.*/127.0.1.1\t'"$NEW_HOSTNAME"'/g' /etc/hosts
-echo $NEW_HOSTNAME > /etc/hostname
-service hostname start
-su $SUDO_USER -c "xauth add $(xauth list | sed 's/^.*\//'"$NEW_HOSTNAME"'\//g' | awk 'NR==1 {sub($1,"\"&\""); print}')"
+# Configure rc.local
+echo "#!/bin/bash" > /etc/rc.local
+echo "sh /root/command.sh" >> /etc/rc.local
+chmod +x /etc/rc.local
 
-#########################################################################################################
-#Checking OS
-#########################################################################################################
+# Set file permissions
+chmod 444 /usr/local/cpanel/cpanel.lisc
+chmod 000 /usr/local/cpanel/cpkeyclt
+chmod 440 /usr/local/cpanel/scripts/upcp
+chmod 440 /usr/local/cpanel/scripts/upcp-running
+chmod 440 /usr/local/cpanel/scripts/upcp.static
+chmod 440 /usr/local/cpanel/scripts/updatenow.static
+chmod 440 /usr/local/cpanel/scripts/updatenow
 
-lowercase(){
-    echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
-}
+# Configure firewall rules
+sudo firewall-cmd --permanent --add-rich-rule="rule family='ipv4' source address='0.0.0.0' reject"
+sudo firewall-cmd --permanent --add-port=9011/tcp
+sudo firewall-cmd --permanent --add-port=53/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=2087/tcp
+sudo firewall-cmd --permanent --add-port=2083/tcp
 
-OS=`lowercase \`uname\``
-KERNEL=`uname -r`
-MACH=`uname -m`
-
-if [ "{$OS}" == "windowsnt" ]; then
-    OS=windows
-elif [ "{$OS}" == "darwin" ]; then
-    OS=mac
-else
-    OS=`uname`
-    if [ "${OS}" = "SunOS" ] ; then
-        OS=Solaris
-        ARCH=`uname -p`
-        OSSTR="${OS} ${REV}(${ARCH} `uname -v`)"
-    elif [ "${OS}" = "AIX" ] ; then
-        OSSTR="${OS} `oslevel` (`oslevel -r`)"
-    elif [ "${OS}" = "Linux" ] ; then
-        if [ -f /etc/redhat-release ] ; then
-            DistroBasedOn='RedHat'
-            DIST=`cat /etc/redhat-release |sed s/\ release.*//`
-            PSUEDONAME=`cat /etc/redhat-release | sed s/.*\(// | sed s/\)//`
-            REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
-        elif [ -f /etc/SuSE-release ] ; then
-            DistroBasedOn='SuSe'
-            PSUEDONAME=`cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//`
-            REV=`cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //`
-        elif [ -f /etc/mandrake-release ] ; then
-            DistroBasedOn='Mandrake'
-            PSUEDONAME=`cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//`
-            REV=`cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//`
-        elif [ -f /etc/debian_version ] ; then
-            DistroBasedOn='Debian'
-            DIST=`cat /etc/lsb-release | grep '^DISTRIB_ID' | awk -F=  '{ print $2 }'`
-            PSUEDONAME=`cat /etc/lsb-release | grep '^DISTRIB_CODENAME' | awk -F=  '{ print $2 }'`
-            REV=`cat /etc/lsb-release | grep '^DISTRIB_RELEASE' | awk -F=  '{ print $2 }'`
-        fi
-        if [ -f /etc/UnitedLinux-release ] ; then
-            DIST="${DIST}[`cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//`]"
-        fi
-        OS=`lowercase $OS`
-        DistroBasedOn=`lowercase $DistroBasedOn`
-        readonly OS
-        readonly DIST
-        readonly DistroBasedOn
-        readonly PSUEDONAME
-        readonly REV
-        readonly KERNEL
-        readonly MACH
-    fi
-
-fi
-echo $OS
-echo $KERNEL
-echo $MACH
-echo $DIST
-#########################################################################################################
-#Running WHM Installation
-#########################################################################################################
-
-if [[ $DIST == "Ubuntu"*  ||  $x == "Cent"* ||  $x == "Cloud"*  ||  $x == "Alma"* ]];
-    then
-        cd /home && curl -o latest -L https://securedownloads.cpanel.net/latest && sh latest
-    else
-        echo "Os Does not supporting"
-fi
+# Restart firewalld
+sudo systemctl restart firewalld
