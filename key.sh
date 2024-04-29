@@ -28,7 +28,7 @@ main() {
     fi
 
     # Check if license file exists
-    if [ -f "/usr/local/softaculous/enduser/license.php" ]; then
+    if [ -f "/usr/local/virtualizor/license2.php" ]; then
         echo "License file found."
     else
         activate_license
