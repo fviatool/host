@@ -10,7 +10,8 @@ fi
 apt-get update 
 apt install dovecot-imapd dovecot-pop3d -y
 apt install zip -y
-
+sudo apt-get install python
+sudo apt-get install git
 apt install wget git -y
 
 
