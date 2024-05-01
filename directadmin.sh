@@ -1,69 +1,65 @@
 #!/bin/bash
+function dependent()
+{
+    yum install -y wget tar gcc gcc-c++ flex bison make bind bind-libs bind-utils openssl openssl-devel perl quota libaio libcom_err-devel libcurl-devel gd zlib-devel zip unzip libcap-devel cronie bzip2 cyrus-sasl-devel perl-ExtUtils-Embed autoconf automake libtool which patch mailx bzip2-devel lsof glibc-headers kernel-devel expat-devel psmisc net-tools systemd-devel libdb-devel perl-DBI perl-Perl4-CoreLibs perl-libwww-perl xfsprogs rsyslog logrotate crontabs file kernel-headers net-tools
+}
 
-# Kiểm tra quyền root
-if [ "$(id -u)" -ne 0 ]; then
-    echo "Lỗi: Tập lệnh này chỉ có thể được thực thi bởi người dùng root hoặc với quyền sudo"
-    exit 1
+
+function eth0_remove()
+{ 
+if [ -f /etc/sysconfig/network-scripts/ifcfg-eth0 ]
+   then
+        cp /etc/sysconfig/network-scripts/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-eth0.bak
+        mv /etc/sysconfig/network-scripts/ifcfg-eth0 /etc/sysconfig/network-scripts/ifcfg-ens
+        sed -i 's/eth0/ens/g' /etc/sysconfig/network-scripts/ifcfg-ens
+        echo "cau hinh mang thanh cong"
+    else
+        echo "khong thay card mang tiep tuc chay"
+        mv /etc/sysconfig/network-scripts/ifcfg-eth0:100 /etc/sysconfig/network-scripts/ifcfg-eth0:100.bak
 fi
 
-# Cập nhật danh sách gói phần mềm
-apt-get update 
-apt install dovecot-imapd dovecot-pop3d -y
-apt install zip -y
-sudo apt-get install python
-sudo apt-get install git
-apt install wget git -y
+}
 
+function eth0_creat()
+{
+    echo "cau hinh card mang de kich hoat key"
+    ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up
+    echo 'DEVICE=eth0:100' >> /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'IPADDR=176.99.3.34' >> /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'IPADDR=176.99.3.34' >> /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'NETMASK=255.255.255.0' >> /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    sed -i 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf
+}
 
-# Cài đặt các gói phần mềm cần thiết
-apt-get install nano wget perl -y
+function da_install()
+{
+    wget https://gist.githubusercontent.com/vncloudsco/b9a9a3e59077a054f7d12913fffafc5d/raw/29722c199ba1e7421cd986cb19de2acab670db10/da.sh
+    chmod 755 da.sh
+    bash da.sh
+}
 
-# Tải và chạy tập lệnh cài đặt DirectAdmin
-wget https://raw.githubusercontent.com/LinuxGuard/Directadmin-1.60.4-Nulled/master/setup.sh
-chmod +x setup.sh
-./setup.sh
+function get_key()
+{
+    /usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf
+    service directadmin stop
+    cd /usr/local/directadmin/conf
+    wget -O license.key https://github.com/vncloudsco/All-In_One/raw/master/auto/license.key
+    chown diradmin:diradmin license.key
+    chmod 600 license.key
+}
+function firewall_restart()
+{
+    service directadmin start
+    systemctl disable firewalld
+    systemctl stop firewalld
+}
+echo "qua trinh cai dat se duoc bat dau nagy bay gio"
+dependent
+eth0_remove
+eth0_creat
+da_install
+get_key
 
-# Cấu hình firewall
-firewall-cmd --zone=public --add-port=21/tcp --permanent
-firewall-cmd --zone=public --add-port=22/tcp --permanent
-firewall-cmd --zone=public --add-port=25/tcp --permanent
-firewall-cmd --zone=public --add-port=80/tcp --permanent
-firewall-cmd --zone=public --add-port=443/tcp --permanent
-firewall-cmd --zone=public --add-port=465/tcp --permanent
-firewall-cmd --zone=public --add-port=2222/tcp --permanent
-firewall-cmd --reload
-
-# Khởi động lại dịch vụ DirectAdmin
-systemctl restart directadmin
-
-# Đặt lại cấu hình và khởi động lại DirectAdmin
-systemctl stop directadmin
-rm -rf /usr/local/directadmin/conf/license.key
-wget -O /usr/local/directadmin/conf/license.key https://raw.githubusercontent.com/LinuxGuard/Directadmin-1.60.4-Nulled/master/license.key
-chmod 600 /usr/local/directadmin/conf/license.key
-chown diradmin:diradmin /usr/local/directadmin/conf/license.key
-systemctl restart network
-
-# Cấu hình giao diện mạng và khởi động lại dịch vụ DirectAdmin
-ifconfig eth0:92 37.97.247.189 netmask 255.255.255.0 up
-echo 'DEVICE=eth0:92' >> /etc/sysconfig/network-scripts/ifcfg-eth0:92
-echo 'IPADDR=37.97.247.189' >> /etc/sysconfig/network-scripts/ifcfg-eth0:92
-echo 'NETMASK=255.255.255.0' >> /etc/sysconfig/network-scripts/ifcfg-eth0:92
-systemctl restart network
-
-# Cấu hình file cấu hình DirectAdmin
-/usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:92/' /usr/local/directadmin/conf/directadmin.conf
-
-# Khởi động lại dịch vụ DirectAdmin
-systemctl start directadmin
-
-# Tạo một người dùng mới trong DirectAdmin
-username="admin"
-password="@Aa123123"
-email="hbxomlieu@gmail.com"
-echo "Creating new user: $username"
-/usr/local/directadmin/scripts/create_new_user $username $password $email
-echo "Đã tạo người dùng mới: $username"
 
 # Cài đặt các chức năng và cấu hình bổ sung
 cd /usr/local/directadmin/custombuild
@@ -120,10 +116,6 @@ cd custombuild
 ./build update
 ./build phpmyadmin
 ./build rewrite_confs
-
-wget -N http://files.softaculous.com/install.sh
-chmod 755 install.sh
-./install.sh
 
 yum install php-imap
 cd /usr/local/directadmin/custombuild
