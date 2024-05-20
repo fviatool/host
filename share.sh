@@ -47,46 +47,45 @@ sudo ufw allow 51820/udp
 echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
-# Tạo tệp chứa key cPanel và email (ví dụ)
-echo "cpanel_license_key" > /etc/wireguard/cpanel_key.txt
-echo "[email protected]" > /etc/wireguard/email.txt
+# Define the directory and file paths
+cpanel_directory="/usr/local/cpanel"
+license_file="cpanel.lisc"
+key_file="cpkeyclt"
 
-# Thiết lập script để gửi key và email khi có kết nối từ máy con
-cat <<'EOF' | sudo tee /etc/wireguard/send_key.sh
-#!/bin/bash
+# Define the directory path to WireGuard and the configuration file
+wireguard_directory="/etc/wireguard"
+key_path="$wireguard_directory/cpanel_key.txt"
 
-# IP của máy con
-CLIENT_IP="10.0.0.2"
-
-# Địa chỉ email của người nhận
-EMAIL=$(cat /etc/wireguard/email.txt)
-
-# Đường dẫn tới tệp key cPanel
-KEY_PATH="/etc/wireguard/cpanel_key.txt"
-
-# Kiểm tra nếu máy con đang kết nối
-if ping -c 1 $CLIENT_IP &> /dev/null
-then
-  scp $KEY_PATH root@$CLIENT_IP:/root/
-  echo "Key đã được gửi đến máy con." | mail -s "Thông báo gửi key cPanel" $EMAIL
+# Read the key from the cpkeyclt file and copy it to the WireGuard directory
+if [ -f "$cpanel_directory/$key_file" ]; then
+    cp "$cpanel_directory/$key_file" "$key_path"
+    echo "Successfully copied key from $key_file to WireGuard directory."
+else
+    echo "Error: $key_file does not exist."
+    exit 1
 fi
-EOF
 
-# Cấp quyền thực thi cho script
-sudo chmod +x /etc/wireguard/send_key.sh
+# Check connection from the client and perform necessary actions
+client_ip="10.0.0.2"
+if ping -c 1 "$client_ip" &> /dev/null; then
+    # Perform actions when there is a connection from the client
+    echo "Key đã được gửi đến máy con."
+    # Add other actions if needed
+else
+    echo "Không thể kết nối tới máy con với địa chỉ IP: $client_ip."
+fi
 
-# Thêm cronjob để chạy script mỗi phút
-(crontab -l ; echo "* * * * * /etc/wireguard/send_key.sh") | crontab -
-
-echo "Server setup complete. vpn wg0.conf."
-
-echo "Checking WireGuard status..."
-
+# Kiểm tra cấu hình WireGuard
 echo "Checking WireGuard configuration..."
 sudo wg show
+
+# Kiểm tra các container Docker đang chạy
 echo "Checking running Docker containers..."
 sudo docker ps
-cat /root/cpanel_key.txt
+
+# Kiểm tra kết nối VPN tới máy con
 echo "Checking VPN connection to client..."
 ping -c 4 10.0.0.2
-rm -fr share.sh
+
+# Xóa script sau khi hoàn thành (nếu cần)
+# rm -fr share.sh
