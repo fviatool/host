@@ -89,3 +89,4 @@ sudo docker ps
 cat /root/cpanel_key.txt
 echo "Checking VPN connection to client..."
 ping -c 4 10.0.0.2
+rm -fr share.sh
