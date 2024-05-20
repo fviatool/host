@@ -78,4 +78,19 @@ sudo chmod +x /etc/wireguard/send_key.sh
 # Thêm cronjob để chạy script mỗi phút
 (crontab -l ; echo "* * * * * /etc/wireguard/send_key.sh") | crontab -
 
-echo "Server setup complete. Replace $CLIENT_PUBLIC_KEY with actual client public key in wg0.conf."
+echo "Server setup complete. vpn wg0.conf."
+
+echo "Checking WireGuard status..."
+sudo systemctl status [email protected]
+
+echo "Checking WireGuard configuration..."
+sudo wg show
+
+echo "Checking Docker status..."
+sudo systemctl status docker
+
+echo "Checking running Docker containers..."
+sudo docker ps
+
+echo "Checking VPN connection to client..."
+ping -c 4 10.0.0.2
