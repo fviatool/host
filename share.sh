@@ -81,16 +81,11 @@ sudo chmod +x /etc/wireguard/send_key.sh
 echo "Server setup complete. vpn wg0.conf."
 
 echo "Checking WireGuard status..."
-sudo systemctl status [hbxomlieu@gmail.com]
 
 echo "Checking WireGuard configuration..."
 sudo wg show
-
-echo "Checking Docker status..."
-sudo systemctl status docker
-
 echo "Checking running Docker containers..."
 sudo docker ps
-
+cat /root/cpanel_key.txt
 echo "Checking VPN connection to client..."
 ping -c 4 10.0.0.2
