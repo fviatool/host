@@ -81,7 +81,7 @@ sudo chmod +x /etc/wireguard/send_key.sh
 echo "Server setup complete. vpn wg0.conf."
 
 echo "Checking WireGuard status..."
-sudo systemctl status [email protected]
+sudo systemctl status [hbxomlieu@gmail.com]
 
 echo "Checking WireGuard configuration..."
 sudo wg show
