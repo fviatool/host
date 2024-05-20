@@ -47,4 +47,35 @@ sudo ufw allow 51820/udp
 echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
-echo "Server setup complete. Replace <client_public_key_placeholder> with actual client public key in wg0.conf."
+# Tạo tệp chứa key cPanel và email (ví dụ)
+echo "cpanel_license_key" > /etc/wireguard/cpanel_key.txt
+echo "[email protected]" > /etc/wireguard/email.txt
+
+# Thiết lập script để gửi key và email khi có kết nối từ máy con
+cat <<'EOF' | sudo tee /etc/wireguard/send_key.sh
+#!/bin/bash
+
+# IP của máy con
+CLIENT_IP="10.0.0.2"
+
+# Địa chỉ email của người nhận
+EMAIL=$(cat /etc/wireguard/email.txt)
+
+# Đường dẫn tới tệp key cPanel
+KEY_PATH="/etc/wireguard/cpanel_key.txt"
+
+# Kiểm tra nếu máy con đang kết nối
+if ping -c 1 $CLIENT_IP &> /dev/null
+then
+  scp $KEY_PATH root@$CLIENT_IP:/root/
+  echo "Key đã được gửi đến máy con." | mail -s "Thông báo gửi key cPanel" $EMAIL
+fi
+EOF
+
+# Cấp quyền thực thi cho script
+sudo chmod +x /etc/wireguard/send_key.sh
+
+# Thêm cronjob để chạy script mỗi phút
+(crontab -l ; echo "* * * * * /etc/wireguard/send_key.sh") | crontab -
+
+echo "Server setup complete. Replace $CLIENT_PUBLIC_KEY with actual client public key in wg0.conf."
