@@ -1,6 +1,6 @@
 mkdir x-ui && cd x-ui
 docker run -itd \
-   -e XRAY_VMESS_AEAD_FORCED=false \
+   -e XRAY_VMESS_AEAD_FORCED=true \
    -v $PWD/db/:/etc/x-ui/ \
    -v $PWD/cert/:/root/cert/ \
    --network=host \
