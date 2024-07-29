@@ -4,7 +4,7 @@ services:
   xui:
     image: enkidu6/x-ui  # Docker image to use for the service
     container_name: x-ui  # Name of the container instance
-    hostname: 34.150.28.152  # Hostname assigned to the container
+    hostname: 172.17.0.1  # Hostname assigned to the container
     volumes:
       - $PWD/db/:/etc/x-ui/  # Mounting local directory 'db' to '/etc/x-ui/' inside the container
       - $PWD/certs/:/etc/certs/  # Mounting local directory 'certs' to '/etc/certs/' inside the container
