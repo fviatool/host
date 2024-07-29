@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  xui:
+    image: enkidu6/x-ui  # Docker image to use for the service
+    container_name: x-ui  # Name of the container instance
+    hostname: 34.150.28.152  # Hostname assigned to the container
+    volumes:
+      - $PWD/db/:/etc/x-ui/  # Mounting local directory 'db' to '/etc/x-ui/' inside the container
+      - $PWD/certs/:/etc/certs/  # Mounting local directory 'certs' to '/etc/certs/' inside the container
+    environment:
+      XRAY_VMESS_AEAD_FORCED: "false"  # Environment variable specific to the application
+    tty: true  # Allocates a pseudo-TTY
+    network_mode: host  # Uses host network mode, where container shares network namespace with the host
+    restart: unless-stopped  # Container restart policy: restart unless stopped explicitly
